@@ -2,14 +2,18 @@ import requests
 import json
 import base64
 import os
+from dotenv import load_dotenv
 
-# Load secrets from environment
+# Load environment variables from .env file (chỉ dùng khi test local)
+load_dotenv()
+
+# Load secrets từ biến môi trường
 client_id = os.environ['CLIENT_ID']
-client_secret = os.environ["CLIENT_SECRET"]
+client_secret = os.environ['CLIENT_SECRET']
 tenant_id = os.environ['TENANT_ID']
 user_email = os.environ['USER_EMAIL']
 
-# Get access token
+# Lấy access token
 token_url = f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token"
 token_data = {
     "grant_type": "client_credentials",
@@ -18,10 +22,21 @@ token_data = {
     "scope": "https://graph.microsoft.com/.default"
 }
 token_r = requests.post(token_url, data=token_data)
-access_token = token_r.json().get("access_token")
 
-# Prepare email
-email_url = "https://graph.microsoft.com/v1.0/users/" + user_email + "/sendMail"
+# In phản hồi để kiểm tra lỗi xác thực
+print("Token response status:", token_r.status_code)
+print("Token response text:", token_r.text)
+
+# Xử lý lỗi nếu không lấy được token
+try:
+    token_r.raise_for_status()
+    access_token = token_r.json().get("access_token")
+except requests.exceptions.RequestException as e:
+    print("Failed to get access token:", e)
+    exit(1)
+
+# Chuẩn bị email
+email_url = f"https://graph.microsoft.com/v1.0/users/{user_email}/sendMail"
 headers = {
     "Authorization": f"Bearer {access_token}",
     "Content-Type": "application/json"
@@ -55,6 +70,7 @@ email_data = {
     "saveToSentItems": "true"
 }
 
+# Gửi email
 r = requests.post(email_url, headers=headers, data=json.dumps(email_data))
 print("Status:", r.status_code)
 print("Response:", r.text)
