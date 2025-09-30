@@ -4,10 +4,10 @@ import base64
 import os
 
 # Load secrets from environment
-client_id = os.environ["2afd22fa-a97a-413d-a6a0-c3d9370a95b8"]
+client_id = os.environ['CLIENT_ID']
 client_secret = os.environ["CLIENT_SECRET"]
-tenant_id = os.environ["8de19c9b-b186-4528-8c2f-37a9378af571"]
-user_email = os.environ["Kurumi@svpl5.onmicrosoft.com"]
+tenant_id = os.environ['TENANT_ID']
+user_email = os.environ['USER_EMAIL']
 
 # Get access token
 token_url = f"https://login.microsoftonline.com/{tenant_id}/oauth2/v2.0/token"
